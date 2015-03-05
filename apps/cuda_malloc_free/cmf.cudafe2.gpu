@@ -1,0 +1,44 @@
+# 211 "/usr/lib/gcc/x86_64-redhat-linux/4.4.7/include/stddef.h" 3
+typedef unsigned long size_t;
+#include "crt/device_runtime.h"
+# 10 "cmf.cu"
+__global__ __var_used__ extern void _Z8mykernelPf(float *);
+# 18 "cmf.cu"
+__global__ __var_used__ extern void _Z9mykernel2Pf(float *);
+#include "common_functions.h"
+# 10 "cmf.cu"
+__global__ __var_used__ void _Z8mykernelPf(
+# 10 "cmf.cu"
+float *t){
+# 10 "cmf.cu"
+{
+# 10 "cmf.cu"
+{
+# 12 "cmf.cu"
+ int __cuda_local_var_16924_7_non_const_id;
+# 12 "cmf.cu"
+__cuda_local_var_16924_7_non_const_id = ((int)(((blockDim.x) * (blockIdx.x)) + (threadIdx.x)));
+# 14 "cmf.cu"
+(t[__cuda_local_var_16924_7_non_const_id]) = (((float)__cuda_local_var_16924_7_non_const_id) * (10.0F));
+# 16 "cmf.cu"
+} 
+# 16 "cmf.cu"
+}}
+# 18 "cmf.cu"
+__global__ __var_used__ void _Z9mykernel2Pf(
+# 18 "cmf.cu"
+float *t){
+# 18 "cmf.cu"
+{
+# 18 "cmf.cu"
+{
+# 20 "cmf.cu"
+ int __cuda_local_var_16932_7_non_const_id;
+# 20 "cmf.cu"
+__cuda_local_var_16932_7_non_const_id = ((int)(((blockDim.x) * (blockIdx.x)) + (threadIdx.x)));
+# 22 "cmf.cu"
+(t[__cuda_local_var_16932_7_non_const_id]) = ((t[__cuda_local_var_16932_7_non_const_id]) * (2.0F));
+# 24 "cmf.cu"
+} 
+# 24 "cmf.cu"
+}}

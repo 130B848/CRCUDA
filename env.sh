@@ -1,0 +1,1 @@
+export LD_LIBRARY_PATH=/home/taichirou/checkpoint_cuda/lib64
