@@ -49,6 +49,16 @@ typedef struct{
 } Memcpy;
 
 typedef struct{
+  cudaError_t res;
+  cudaStream_t stream;
+} StreamCreate;
+
+typedef struct{
+  cudaError_t res;
+  cudaStream_t stream;
+} StreamDestroy;
+
+typedef struct{
   void** fatCubinHandle;
   __fatBinC_Wrapper_t wrapper;
   struct fatBinaryHeader header;
@@ -78,9 +88,13 @@ typedef struct{
 } RegisterFunction;
 
 typedef struct{
-  char *hostVar;
-  char *deviceAddress;
-  char *deviceName;
+  void** fatCubinHandle;
+  //char *hostVar;
+  int hostVar_size;
+  //char *deviceAddress;
+  int deviceAddress_size;
+  //char *deviceName;
+  int deviceName_size;
   int ext;
   int size;
   int constant;
@@ -105,6 +119,25 @@ typedef struct{
   cudaError_t res;
   int size;
 } Launch;
+
+typedef struct{
+  cudaError_t res;
+} GetLastError;
+
+typedef struct{
+  cudaError_t res;
+} DeviceReset;
+
+typedef struct{
+  cudaError_t res;
+  struct cudaDeviceProp prop;
+  int device;
+} GetDeviceProperties;
+
+typedef struct{
+  cudaError_t res;
+  unsigned int flags;
+} SetDeviceFlags;
 
 typedef struct{
   void* ptr;
@@ -134,15 +167,24 @@ enum{
   MALLOC3D,
   FREE,
   MEMCPY,
+
   REGISTERFATBINARY,
   UNREGISTERFATBINARY,
   REGISTERFUNCTION,
   REGISTERVAR,
   HOSTREGISTER,
   HOSTUNREGISTER,
+
   CONFIGURECALL,
   SETUPARGUMENT,
   LAUNCH,
+  GETLASTERROR,
+  DEVICERESET,
+  GETDEVICEPROPERTIES,
+  SETDEVICEFLAGS,
+
+  STREAMCREATE,
+  STREAMDESTROY,
 };
 
 typedef struct _crcuda_message {
@@ -150,15 +192,26 @@ typedef struct _crcuda_message {
   unsigned int iden;
 
   union{
+    //__func.c
     RegisterFatBinary registerFatBinary;
     RegisterFunction registerFunction;
+    RegisterVar registerVar;
     UnregisterFatBinary unregisterFatBinary;
+    //device.c
     Malloc malloc;
     Free free;
     Memcpy memcpy;
+    //launch.c
     ConfigureCall configureCall;
     SetupArgument setupArgument;
     Launch launch;
+    GetLastError getLastError;
+    DeviceReset deviceReset;
+    GetDeviceProperties getDeviceProperties;
+    SetDeviceFlags setDeviceFlags;
+    //stream.c
+    StreamCreate streamCreate;
+    StreamDestroy streamDestroy;
   } data;
 
 } crcuda_message;

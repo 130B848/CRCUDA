@@ -206,6 +206,8 @@ extern void crcudaMemcpy(crcuda_message*, int);
 extern void crcudaConfigureCall(crcuda_message*, int);
 extern void crcudaSetupArgument(crcuda_message*, int);
 extern void crcudaLaunch(crcuda_message*, int);
+extern void crcudaStreamCreate(crcuda_message*, int);
+extern void crcudaStreamDestroy(crcuda_message*, int);
 
 #define ENTER  
 #define LEAVE  

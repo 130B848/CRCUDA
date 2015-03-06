@@ -165,10 +165,51 @@ void __cudaRegisterVar(void** fatCubinHandle,char *hostVar,char *deviceAddress,c
 
   ENTER;
 
-  UNSUPPORTED;
-
   //  mocu_register_var(size);
   //  mocu_add_symbol(hostVar,deviceAddress,(char*)deviceName,ext,size,constant,global);
+
+  msg->iden = REGISTERVAR;
+  msg->data.registerVar.fatCubinHandle = fatCubinHandle;
+  msg->data.registerVar.ext = ext;
+  msg->data.registerVar.size = size;
+  msg->data.registerVar.constant = constant;
+  msg->data.registerVar.global = global;
+
+  int hostVar_size, deviceAddress_size, deviceName_size;
+  int _size;
+
+  while(hostVar[_size++] != '\0');
+
+  hostVar_size = _size;
+  msg->data.registerVar.hostVar_size = hostVar_size;
+  _size = 0;
+
+  while(deviceAddress[_size++] != '\0');
+
+  deviceAddress_size = _size;
+  msg->data.registerVar.deviceAddress_size = deviceAddress_size;
+  _size = 0;
+
+  while(deviceName[_size++] != '\0');
+
+  deviceName_size = _size;
+  msg->data.registerVar.deviceName_size = deviceName_size;
+  _size = 0;
+
+  printf("hostVar            : %s\n", hostVar);
+  printf("deviceAddress      : %s\n", deviceAddress);
+  printf("deviceName         : %s\n", deviceName);
+  printf("hostVar_size       : %d\n", hostVar_size);
+  printf("deviceAddress_size : %d\n", deviceAddress_size);
+  printf("deviceName_size    : %d\n", deviceName_size);
+
+  SEND;
+  SEND_BUFF((void*)hostVar, hostVar_size);
+  SEND_BUFF((void*)deviceAddress, deviceAddress_size);
+  SEND_BUFF((void*)deviceName, deviceName_size);
+  RECV;
+
+  LEAVE;
 
 }
 
@@ -231,7 +272,7 @@ void __cudaRegisterFunction(void **fatCubinHandle,const char *hostFun,char *devi
 
   hostFun_size = size;
   msg->data.registerFunction.hostFun_size = hostFun_size;
-  size = 0;
+  size = 0; 
 
   while(deviceFun[size++] != '\0');
 
@@ -258,9 +299,13 @@ cudaError_t cudaDeviceReset(void){
 
   ENTER;
 
-  UNSUPPORTED;
+  msg->iden = DEVICERESET;
+  SEND;
+  RECV;
 
   LEAVE;
+
+  return msg->data.deviceReset.res;
   
 }
 
@@ -531,9 +576,13 @@ cudaError_t cudaGetLastError(void){
 
   ENTER;
 
-  UNSUPPORTED;
+  msg->iden = GETLASTERROR;
+  SEND;
+  RECV;
 
   LEAVE;
+
+  return msg->data.getLastError.res;
 
 }
 
@@ -570,9 +619,13 @@ cudaError_t cudaGetDeviceCount(int *count){
 
   ENTER;
 
-  UNSUPPORTED;
+  ///TEST
+
+  *count = 1;
 
   LEAVE;
+
+  return cudaSuccess;
 
 }
 
@@ -583,9 +636,17 @@ cudaError_t cudaGetDeviceProperties(struct cudaDeviceProp *prop,  int device){
 
   ENTER;
 
-  UNSUPPORTED;
+  msg->iden = GETDEVICEPROPERTIES;
+  msg->data.getDeviceProperties.device = device;
+
+  SEND;
+  RECV;
+
+  *prop = msg->data.getDeviceProperties.prop;
 
   LEAVE;
+
+  return msg->data.getDeviceProperties.res;
 
 }
 
@@ -622,9 +683,11 @@ cudaError_t cudaSetDevice(int device){
 
   ENTER;
 
-  UNSUPPORTED;
+  //TEST
 
   LEAVE;
+
+  return cudaSuccess;
 
 }
 
@@ -661,9 +724,15 @@ cudaError_t cudaSetDeviceFlags( unsigned int flags ){
 
   ENTER;
 
-  UNSUPPORTED;
+  msg->iden = SETDEVICEFLAGS;
+  msg->data.setDeviceFlags.flags = flags;
+
+  SEND;
+  RECV;
 
   LEAVE;
+
+  return msg->data.setDeviceFlags.res;
 
 }
 
@@ -674,9 +743,27 @@ cudaError_t cudaStreamCreate(cudaStream_t *pStream){
 
   ENTER;
 
-  UNSUPPORTED;
+  crcuda_stream* sp;
+  cudaError_t res;
+
+  msg->iden = STREAMCREATE;
+
+  SEND;
+  RECV;
+
+  sp = (crcuda_stream*)malloc(sizeof(crcuda_stream));
+  sp->s = msg->data.streamCreate.stream;
+  sp->mode = 0;
+  sp->prev = crcuda.cp->s1->prev;
+  sp->next = crcuda.cp->s1;
+  sp->prev->next = sp;
+  sp->next->prev = sp;
+  
+  *pStream = (cudaStream_t)sp;
 
   LEAVE;
+
+  return msg->data.streamCreate.res;
 
 }
 
@@ -700,10 +787,14 @@ cudaError_t cudaStreamDestroy(cudaStream_t iStream){
 
   ENTER;
 
-  UNSUPPORTED;
+  msg->iden = STREAMDESTROY;
+  msg->data.streamDestroy.stream = ((crcuda_stream*)iStream)->s;
+  SEND;
+  RECV;
 
   LEAVE;
 
+  return msg->data.streamDestroy.res;
 }
 
 

@@ -29,6 +29,22 @@ void crcuda_call(crcuda_message *msg, int sd){
 
     break;
 
+  case STREAMCREATE:
+
+    printf("cudaStreamCreate\n");
+
+    crcudaStreamCreate(msg, sd);
+    
+    break;
+
+  case STREAMDESTROY:
+
+    printf("cudaStreamDestroy\n");
+
+    crcudaStreamDestroy(msg, sd);
+    
+    break;
+
   case CONFIGURECALL:
 
     printf("cudaConfigureCall\n");
@@ -53,6 +69,38 @@ void crcuda_call(crcuda_message *msg, int sd){
 
     break;
 
+  case GETLASTERROR:
+
+    printf("cudaGetLastError\n");
+
+    crcudaGetLastError(msg, sd);
+    
+    break;
+
+  case DEVICERESET:
+
+    printf("cudaDeviceReset\n");
+
+    crcudaDeviceReset(msg, sd);
+    
+    break;
+
+  case GETDEVICEPROPERTIES:
+
+    printf("cudaGetDeviceProperties\n");
+
+    crcudaGetDeviceProperties(msg, sd);
+
+    break;
+
+  case SETDEVICEFLAGS:
+    
+    printf("cudaSetDeviceFlags\n");
+
+    crcudaSetDeviceFlags(msg, sd);
+
+    break;
+
   case REGISTERFATBINARY:
 
     printf("__cudaRegisterFatBinary\n");
@@ -66,6 +114,14 @@ void crcuda_call(crcuda_message *msg, int sd){
     printf("__cudaRegisterFunction\n");
 
     __crcudaRegisterFunction(msg, sd);
+
+    break;
+
+  case REGISTERVAR:
+    
+    printf("__cudaRegisterVar\n");
+
+    __crcudaRegisterVar(msg, sd);
 
     break;
 

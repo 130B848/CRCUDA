@@ -7,7 +7,10 @@ INCLUDE = -I../include -I/usr/local/cuda/include
 OBJS =  main.o      \
 	load.o      \
 	assign.o    \
-	functions.o \
+	__func.o    \
+	device.o    \
+	stream.o    \
+	launch.o    \
 	message.o   \
 	kernels.o   \
 
