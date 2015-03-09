@@ -83,8 +83,12 @@ int main(){
 
   msg = (crcuda_message*)malloc(sizeof(crcuda_message));
 
-  buff_send = malloc(1024*1024);
-  buff_recv = malloc(1024*1024);
+  buff_send = malloc(1024*1024*1024);
+  //  crcuda.crcudaHostRegister(buff_send, 1024*1024, cudaHostRegisterMapped);
+  buff_recv = malloc(1024*1024*1024);
+  //  crcuda.crcudaHostRegister(buff_recv, 1024*1024, cudaHostRegisterMapped);
+  //  crcuda.crcudaHostAlloc((void*)&buff_send, 1024*1024, 0);
+  //  crcuda.crcudaHostAlloc((void*)&buff_recv, 1024*1024, 0);
 
   do{
 

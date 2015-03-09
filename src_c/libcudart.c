@@ -787,10 +787,20 @@ cudaError_t cudaStreamDestroy(cudaStream_t iStream){
 
   ENTER;
 
+  crcuda_stream* sp;
+
+  sp = (crcuda_stream*)iStream;
+
   msg->iden = STREAMDESTROY;
-  msg->data.streamDestroy.stream = ((crcuda_stream*)iStream)->s;
+  msg->data.streamDestroy.stream = sp != NULL ? sp->s : NULL;
+
   SEND;
   RECV;
+
+  sp->next->prev = sp->prev;
+  sp->prev->next = sp->next;
+
+  free(sp);
 
   LEAVE;
 
@@ -854,10 +864,29 @@ cudaError_t cudaEventCreateWithFlags(cudaEvent_t *iEvent,  unsigned int flags){
 
   ENTER;
 
-  UNSUPPORTED;
+  crcuda_event* ep;
+  cudaError_t res;
+
+  msg->iden = EVENTCREATEWITHFLAGS;
+  msg->data.eventCreateWithFlags.flags = flags;
+
+  SEND;
+  RECV;
+
+  ep = (crcuda_event*)malloc(sizeof(crcuda_event));
+  ep->e = msg->data.eventCreateWithFlags.event;
+  ep->flags = flags;
+  ep->mode = 0;
+  ep->prev = crcuda.cp->e1->prev;
+  ep->next = crcuda.cp->e1;
+  ep->prev->next = ep;
+  ep->next->prev = ep;
+
+  *iEvent = (cudaEvent_t)ep;
 
   LEAVE;
 
+  return msg->data.eventCreateWithFlags.res;
 }
 
 
@@ -879,10 +908,24 @@ cudaError_t cudaEventRecord(cudaEvent_t iEvent,  cudaStream_t iStream ){
 
   ENTER;
 
-  UNSUPPORTED;
+  crcuda_event* ep;
+  crcuda_stream* sp;
+
+  ep = (crcuda_event*)iEvent;
+  sp = (crcuda_stream*)iStream;
+
+  ep->mode = 1;
+
+  msg->iden = EVENTRECORD;
+  msg->data.eventRecord.event = ep->e;
+  msg->data.eventRecord.stream = sp != NULL ? sp->s : NULL;
+  
+  SEND;
+  RECV;
 
   LEAVE;
 
+  return msg->data.eventRecord.res;
 }
 
 
@@ -905,10 +948,19 @@ cudaError_t cudaEventSynchronize(cudaEvent_t event){
 
   ENTER;
 
-  UNSUPPORTED;
+  crcuda_event* ep;
+
+  ep = (crcuda_event*)event;
+
+  msg->iden = EVENTSYNCHRONIZE;
+  msg->data.eventSynchronize.event = ep->e;
+
+  SEND;
+  RECV;
 
   LEAVE;
 
+  return msg->data.eventSynchronize.res;
 }
 
 
@@ -918,9 +970,24 @@ cudaError_t cudaEventDestroy(cudaEvent_t event){
 
   ENTER;
 
-  UNSUPPORTED;
+  crcuda_event* ep;
+
+  ep = (crcuda_event*)event;
+
+  msg->iden = EVENTDESTROY;
+  msg->data.eventDestroy.event = ep->e;
+
+  SEND;
+  RECV;
+
+  ep->next->prev = ep->prev;
+  ep->prev->next = ep->next;
+
+  free(ep);
 
   LEAVE;
+
+  return msg->data.eventDestroy.res;
 
 }
 
@@ -931,10 +998,64 @@ cudaError_t cudaEventElapsedTime(float *ms,  cudaEvent_t start,  cudaEvent_t end
 
   ENTER;
 
-  UNSUPPORTED;
+  crcuda_event *ep0, *ep1;
+  float f;
+
+  ep0 = (crcuda_event*)start;
+  ep1 = (crcuda_event*)end;
+
+  if(ep0->mode == 0 || ep1->mode == 0){
+    return cudaErrorNotReady;
+  }
+
+  msg->iden = EVENTELAPSEDTIME;
+
+  switch(ep0->mode == 0 || ep1->mode == 0){
+  case 3:
+
+    msg->data.eventElapsedTime.start = ep0->e;
+    msg->data.eventElapsedTime.end   = ep1->e;
+
+    SEND;
+    RECV;
+
+    *ms = msg->data.eventElapsedTime.ms;
+
+    break;
+  case 4:
+
+    msg->data.eventElapsedTime.start = crcuda.cp->e0->e;
+    msg->data.eventElapsedTime.end   = ep0->e;
+
+    SEND;
+    RECV;
+
+    *ms = msg->data.eventElapsedTime.ms;
+
+    break;
+  case 5:
+
+    msg->data.eventElapsedTime.start = crcuda.cp->e0->e;
+    msg->data.eventElapsedTime.end   = ep1->e;
+
+    SEND;
+    RECV;
+
+    *ms = msg->data.eventElapsedTime.ms;
+
+    break;
+  case 6:
+
+    *ms = ep0->charge-ep1->charge;
+
+    LEAVE;
+
+    return cudaSuccess;
+  }
 
   LEAVE;
 
+  return msg->data.eventElapsedTime.res;
 }
 
 
@@ -1272,9 +1393,9 @@ cudaError_t cudaHostRegister(void *ptr,  size_t size,  unsigned int flags){
 
   ENTER;
 
-  UNSUPPORTED;
-
   LEAVE;
+
+  return cudaSuccess;
 
 }
 
@@ -1285,9 +1406,9 @@ cudaError_t cudaHostUnregister(void *ptr){
 
   ENTER;
 
-  UNSUPPORTED;
-
   LEAVE;
+
+  return cudaSuccess;
 
 }
 
@@ -1457,8 +1578,8 @@ cudaError_t cudaMemcpy(void *dst,  const void *src,  size_t count,  enum cudaMem
   msg->iden = MEMCPY;
   msg->data.memcpy.kind  = kind;
   msg->data.memcpy.count = count;
-  msg->data.memcpy.dst = dst;
-  msg->data.memcpy.src = (void*)src;
+  msg->data.memcpy.dst   = dst;
+  msg->data.memcpy.src   = (void*)src;
 
   if(kind == cudaMemcpyHostToDevice){
 
@@ -1616,9 +1737,34 @@ cudaError_t cudaMemcpyAsync(void *dst,  const void *src,  size_t count,  enum cu
 
   ENTER;
 
-  UNSUPPORTED;
-    
+  crcuda_stream* sp;
+
+  sp = (crcuda_stream*)iStream;
+
+  msg->iden = MEMCPYASYNC;
+  msg->data.memcpyAsync.kind = kind;
+  msg->data.memcpyAsync.count = count;
+  msg->data.memcpyAsync.dst = dst;
+  msg->data.memcpyAsync.src = (void*)src;
+  msg->data.memcpyAsync.stream = (sp != NULL ? sp->s : NULL);
+
+  if(kind == cudaMemcpyHostToDevice){
+
+    SEND;
+    SEND_BUFF((void*)src, count);
+    RECV;
+
+  }else{
+
+    SEND;
+    RECV_BUFF(dst, count);
+    RECV;
+
+  }
+
   LEAVE;
+
+  return msg->data.memcpyAsync.res;
 
 }
 
@@ -1733,9 +1879,17 @@ cudaError_t cudaMemset(void *devPtr,  int value,  size_t count){
 
   ENTER;
 
-  UNSUPPORTED;
-  
+  msg->iden = MEMSET;
+  msg->data.memset.devPtr = devPtr;
+  msg->data.memset.value = value;
+  msg->data.memset.count = count;
+
+  SEND;
+  RECV;
+
   LEAVE;
+
+  return msg->data.memset.res;
 
 }
 

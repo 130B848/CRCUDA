@@ -195,8 +195,7 @@ extern void recv_buff(size_t, int);
 #define SEND_BUFF(size, sd) send_buff(size, sd);
 #define RECV_BUFF(size, sd) recv_buff(size, sd);
 
-//functions.c
-extern void __crcudaRegisterFatBinary_Before(crcuda_message*, int);
+/*
 extern void __crcudaRegisterFatBinary(crcuda_message*, int);
 extern void __crcudaRegisterFunction(crcuda_message*, int);
 extern void __crcudaUnregisterFatBinary(crcuda_message*, int);
@@ -208,6 +207,7 @@ extern void crcudaSetupArgument(crcuda_message*, int);
 extern void crcudaLaunch(crcuda_message*, int);
 extern void crcudaStreamCreate(crcuda_message*, int);
 extern void crcudaStreamDestroy(crcuda_message*, int);
+*/
 
 #define ENTER  
 #define LEAVE  

@@ -20,6 +20,17 @@ extern void recv_buff(void*, size_t);
 #define SEND_BUFF(ptr, size) send_buff(ptr, size);
 #define RECV_BUFF(ptr, size) recv_buff(ptr, size);
 
+//event.c
+extern void crcuda_event_update();
+extern void crcuda_event_restore();
+
+//stream.c
+extern void crcuda_stream_restore();
+
+//device.c
+extern void crcuda_device_backup();
+extern void crcuda_device_restore();
+
 typedef struct _stream{
   struct _stream *prev,*next;
   cudaStream_t s;

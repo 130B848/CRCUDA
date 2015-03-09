@@ -50,3 +50,49 @@ void crcudaMemcpy(crcuda_message* msg, int sd){
     
   }
 }
+
+void crcudaMemcpyAsync(crcuda_message* msg, int sd){
+  
+  if(msg->data.memcpyAsync.kind == cudaMemcpyHostToDevice){
+
+    RECV_BUFF(msg->data.memcpyAsync.count, sd);
+
+    msg->data.memcpyAsync.res = 
+      crcuda.crcudaMemcpyAsync(msg->data.memcpyAsync.dst,
+			       buff_recv,
+			       msg->data.memcpyAsync.count,
+			       msg->data.memcpyAsync.kind,
+			       msg->data.memcpyAsync.stream);
+
+    SEND(msg, sd);
+    
+  }else{
+
+    printf("\tstream : %p\n", (void*)msg->data.memcpyAsync.stream);
+    printf("\tsrc    : %p\n", msg->data.memcpyAsync.src);
+    printf("\tkind   : %d\n", msg->data.memcpyAsync.kind);
+    printf("\tcount  : %d\n", msg->data.memcpyAsync.count);
+    
+    msg->data.memcpyAsync.res
+      = crcuda.crcudaMemcpyAsync(buff_send,
+				 msg->data.memcpyAsync.src,
+				 msg->data.memcpyAsync.count,
+				 msg->data.memcpyAsync.kind,
+				 msg->data.memcpyAsync.stream);
+
+    SEND_BUFF(msg->data.memcpyAsync.count, sd);
+    SEND(msg, sd);
+
+  }
+}
+
+void crcudaMemset(crcuda_message* msg, int sd){
+  
+  msg->data.memset.res = 
+    crcuda.crcudaMemset(msg->data.memset.devPtr,
+			msg->data.memset.value,
+			msg->data.memset.count);
+
+  SEND(msg, sd);
+
+}

@@ -50,6 +50,22 @@ typedef struct{
 
 typedef struct{
   cudaError_t res;
+  void* dst;
+  void* src;
+  size_t count;
+  enum cudaMemcpyKind kind;
+  cudaStream_t stream;
+} MemcpyAsync;
+
+typedef struct{
+  cudaError_t res;
+  void* devPtr;
+  int value;
+  size_t count;
+} Memset;
+
+typedef struct{
+  cudaError_t res;
   cudaStream_t stream;
 } StreamCreate;
 
@@ -57,6 +73,35 @@ typedef struct{
   cudaError_t res;
   cudaStream_t stream;
 } StreamDestroy;
+
+typedef struct{
+  cudaError_t res;
+  cudaEvent_t event;
+  unsigned int flags;
+  int mode;
+} EventCreateWithFlags;
+
+typedef struct{
+  cudaError_t res;
+  cudaEvent_t event;
+  cudaStream_t stream;
+} EventRecord;
+
+typedef struct{
+  cudaError_t res;
+  cudaEvent_t event;
+} EventSynchronize;
+
+typedef struct{
+  cudaError_t res;
+  float ms;
+  cudaEvent_t start, end;
+} EventElapsedTime;
+
+typedef struct{
+  cudaError_t res;
+  cudaEvent_t event;
+} EventDestroy;
 
 typedef struct{
   void** fatCubinHandle;
@@ -167,6 +212,8 @@ enum{
   MALLOC3D,
   FREE,
   MEMCPY,
+  MEMCPYASYNC,
+  MEMSET,
 
   REGISTERFATBINARY,
   UNREGISTERFATBINARY,
@@ -185,6 +232,12 @@ enum{
 
   STREAMCREATE,
   STREAMDESTROY,
+
+  EVENTCREATEWITHFLAGS,
+  EVENTRECORD,
+  EVENTSYNCHRONIZE,
+  EVENTELAPSEDTIME,
+  EVENTDESTROY,
 };
 
 typedef struct _crcuda_message {
@@ -201,6 +254,8 @@ typedef struct _crcuda_message {
     Malloc malloc;
     Free free;
     Memcpy memcpy;
+    MemcpyAsync memcpyAsync;
+    Memset memset;
     //launch.c
     ConfigureCall configureCall;
     SetupArgument setupArgument;
@@ -212,6 +267,12 @@ typedef struct _crcuda_message {
     //stream.c
     StreamCreate streamCreate;
     StreamDestroy streamDestroy;
+    //event.c
+    EventCreateWithFlags eventCreateWithFlags;
+    EventRecord eventRecord;
+    EventSynchronize eventSynchronize;
+    EventElapsedTime eventElapsedTime;
+    EventDestroy eventDestroy;
   } data;
 
 } crcuda_message;

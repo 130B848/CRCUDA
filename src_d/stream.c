@@ -11,6 +11,8 @@ void crcudaStreamCreate(crcuda_message* msg, int sd){
   msg->data.streamCreate.res = res;
   msg->data.streamCreate.stream = stream;
 
+  printf("\tstream : %p\n", (void*)stream);
+
   SEND(msg, sd);
 }
 

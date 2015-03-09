@@ -7,6 +7,9 @@ INCLUDE = -I../include -I/usr/local/cuda/include
 OBJS = message.o   \
        libcudart.o \
        connect.o   \
+       event.o     \
+       stream.o    \
+       device.o    \
 
 SHARED = libcudart.so
 LINK1  = libcudart.so.5.5

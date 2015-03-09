@@ -29,6 +29,22 @@ void crcuda_call(crcuda_message *msg, int sd){
 
     break;
 
+  case MEMCPYASYNC:
+
+    printf("cudaMemcpyAsync\n");
+
+    crcudaMemcpyAsync(msg, sd);
+
+    break;
+
+  case MEMSET:
+
+    printf("cudaMemset\n");
+
+    crcudaMemset(msg, sd);
+    
+    break;
+
   case STREAMCREATE:
 
     printf("cudaStreamCreate\n");
@@ -43,6 +59,46 @@ void crcuda_call(crcuda_message *msg, int sd){
 
     crcudaStreamDestroy(msg, sd);
     
+    break;
+
+  case EVENTCREATEWITHFLAGS:
+
+    printf("cudaEventCreateWithFlags\n");
+
+    crcudaEventCreateWithFlags(msg, sd);
+
+    break;
+
+  case EVENTRECORD:
+
+    printf("cudaEventRecord\n");
+
+    crcudaEventRecord(msg, sd);
+
+    break;
+
+  case EVENTSYNCHRONIZE:
+
+    printf("cudaEventSynchronize\n");
+
+    crcudaEventSynchronize(msg, sd);
+
+    break;
+
+  case EVENTELAPSEDTIME:
+
+    printf("cudaEventElapsedTime\n");
+
+    crcudaEventElapsedTime(msg, sd);
+
+    break;
+
+  case EVENTDESTROY:
+
+    printf("cudaEventDestroy\n");
+
+    crcudaEventDestroy(msg, sd);
+
     break;
 
   case CONFIGURECALL:

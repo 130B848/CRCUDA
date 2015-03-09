@@ -10,6 +10,7 @@ OBJS =  main.o      \
 	__func.o    \
 	device.o    \
 	stream.o    \
+	event.o     \
 	launch.o    \
 	message.o   \
 	kernels.o   \
